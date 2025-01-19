@@ -1,6 +1,6 @@
 # A dockerfile to build and run tests (and you can extract binaries from here too).
 # $ docker build .
-FROM silkeh/clang
+FROM silkeh/clang:1.9
 
 WORKDIR /app
 
@@ -9,7 +9,11 @@ WORKDIR /app
 RUN apt-get update \
     && apt-get install -y bison flex valgrind
 
-COPY . .
+ADD src .
+ADD Makefile .
+ADD tests .
+ADD projects .
+ADD assets . 
 
 # Build everything and test it.
 RUN make all
