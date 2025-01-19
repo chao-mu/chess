@@ -1,6 +1,6 @@
 # A dockerfile to build and run tests (and you can extract binaries from here too).
 # $ docker build .
-FROM silkeh/clang:1.9
+FROM silkeh/clang
 
 WORKDIR /app
 
