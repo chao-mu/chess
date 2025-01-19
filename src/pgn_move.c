@@ -5,18 +5,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-pgn_movelist_t *pgn_movelist_new(void) {
-    pgn_movelist_t *moves = malloc(sizeof(pgn_movelist_t));
+#include "smalloc.h"
 
-    moves->head = NULL;
-    moves->tail = NULL;
+pgn_movelist_t *pgn_movelist_new(void) {
+    pgn_movelist_t *moves = smalloc(sizeof(*moves));
 
     return moves;
 }
 
 void pgn_movelist_add(pgn_movelist_t *moves, pgn_movetype_t kind,
                       const char *value) {
-    pgn_move_t *move = malloc(sizeof(pgn_move_t));
+    pgn_move_t *move = smalloc(sizeof(*move));
 
     move->next = NULL;
     move->kind = kind;

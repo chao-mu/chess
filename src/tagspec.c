@@ -7,24 +7,22 @@
 #include <string.h>
 #include <strings.h>
 
-#include "strutil.h"
+#include "smalloc.h"
 
 tagcmp_t *tagcmp_new(const char *name, const char *value, tagcmp_kind_t kind) {
-    tagcmp_t *cmp = malloc(sizeof(tagcmp_t));
+    tagcmp_t *cmp = smalloc(sizeof(*cmp));
 
     cmp->name = strdup(name);
     cmp->value = strdup(value);
     cmp->kind = kind;
-    cmp->next = NULL;
 
     return cmp;
 }
 
 tagorder_t *tagorder_new(const char *name) {
-    tagorder_t *tag = malloc(sizeof(tagorder_t));
+    tagorder_t *tag = smalloc(sizeof(*tag));
 
     tag->name = strdup(name);
-    tag->next = NULL;
 
     return tag;
 }
@@ -65,13 +63,7 @@ void tagspec_add(tagspec_t *spec, const char *name, const char *value,
 }
 
 tagspec_t *tagspec_new(void) {
-    tagspec_t *tags = malloc(sizeof(tagspec_t));
-
-    tags->head = NULL;
-    tags->tail = NULL;
-
-    tags->order_head = NULL;
-    tags->order_tail = NULL;
+    tagspec_t *tags = smalloc(sizeof(*tags));
 
     return tags;
 }

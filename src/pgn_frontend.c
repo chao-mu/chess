@@ -14,7 +14,8 @@
 #define UNUSED(x) (void)(x)
 
 pgn_frontend_t *pgn_frontend_new(void) {
-    pgn_frontend_t *env = malloc(sizeof(struct pgn_frontend_t));
+    pgn_frontend_t *env = smalloc(sizeof(struct pgn_frontend_t));
+
     env->pgns = pgnlist_new();
     env->spec = tagspec_new();
     env->symbols = symboltable_new();

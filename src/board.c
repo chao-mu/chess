@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "smalloc.h"
 #include "square.h"
 
 board_t *board_new(board_turn_t turn) {
-    board_t *board = malloc(sizeof(board_t));
+    board_t *board = smalloc(sizeof(*board));
     for (size_t i = 0; i < SQUARE_COUNT; i++) {
         board->squares[i] = SQUARE_EMPTY;
     }

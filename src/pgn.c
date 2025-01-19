@@ -7,20 +7,16 @@
 #include "gameclock.h"
 #include "pgn_move.h"
 #include "pgn_tag.h"
+#include "smalloc.h"
 
 pgn_t *pgn_new(void) {
-    struct pgn_t *pgn = malloc(sizeof(struct pgn_t));
+    struct pgn_t *pgn = smalloc(sizeof(*pgn));
 
-    pgn->result = NULL;
     pgn->tags = taglist_new();
     pgn->moves = pgn_movelist_new();
 
     pgn->clock_white = gameclock_new();
     pgn->clock_black = gameclock_new();
-
-    pgn->ply = 0;
-
-    pgn->next = NULL;
 
     return pgn;
 }
@@ -40,7 +36,7 @@ void pgn_free(struct pgn_t *pgn) {
 }
 
 pgnlist_t *pgnlist_new(void) {
-    pgnlist_t *pgns = malloc(sizeof(pgnlist_t));
+    pgnlist_t *pgns = smalloc(sizeof(*pgns));
 
     pgns->head = pgn_new();
     pgns->tail = pgns->head;

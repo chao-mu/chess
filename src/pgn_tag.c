@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "smalloc.h"
 #include "tagspec.h"
 
 tag_t *tag_new(const char *name, const char *value, tag_t *next) {
-    tag_t *tag = malloc(sizeof(tag_t));
+    tag_t *tag = smalloc(sizeof(*tag));
 
     tag->name = strdup(name);
     if (value != NULL) {
@@ -34,10 +35,7 @@ void taglist_add(taglist_t *tags, const char *name, const char *value) {
 }
 
 taglist_t *taglist_new(void) {
-    taglist_t *tags = malloc(sizeof(taglist_t));
-
-    tags->head = NULL;
-    tags->tail = NULL;
+    taglist_t *tags = smalloc(sizeof(*tags));
 
     return tags;
 }

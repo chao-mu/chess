@@ -3,8 +3,10 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#include "smalloc.h"
+
 gameclock_t* gameclock_new(void) {
-    gameclock_t* gameclock = malloc(sizeof(gameclock_t));
+    gameclock_t* gameclock = smalloc(sizeof(*gameclock));
 
     gameclock->head = NULL;
     gameclock->tail = NULL;
@@ -38,9 +40,8 @@ int parse_timestamp(const char* h_m_s) {
 }
 
 void gameclock_add(gameclock_t* gameclock, const char* h_m_s) {
-    timestamp_t* next = malloc(sizeof(timestamp_t));
+    timestamp_t* next = smalloc(sizeof(*next));
     next->time = parse_timestamp(h_m_s);
-    next->next = NULL;
 
     if (gameclock->tail == NULL) {
         gameclock->head = next;

@@ -2,11 +2,11 @@
 
 #include <stdlib.h>
 
+#include "smalloc.h"
 #include "square.h"
 
 movelist_t* movelist_new(void) {
-    movelist_t* moves = malloc(sizeof(movelist_t));
-    moves->head = NULL;
+    movelist_t* moves = smalloc(sizeof(*moves));
 
     return moves;
 }
@@ -21,13 +21,10 @@ void move_free(move_t* move) {
 }
 
 move_t* move_new(square_t from, square_t to) {
-    move_t* move = malloc(sizeof(move_t));
-
-    move->next = NULL;
+    move_t* move = smalloc(sizeof(*move));
 
     move->from = from;
     move->to = to;
-    move->capture = false;
 
     return move;
 }

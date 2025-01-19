@@ -8,6 +8,7 @@
 #include "board.h"
 #include "dot.h"
 #include "move.h"
+#include "smalloc.h"
 #include "square.h"
 
 static const gc_direction_t KING_DIRECTIONS[GC_DIRECTION_COUNT] = {
@@ -42,7 +43,7 @@ static const gc_direction_t UNIMPLEMENTED_DIRECTIONS[GC_DIRECTION_COUNT] = {
 gc_node_t *gc_node_new(square_t id, gc_node_color_t color, gc_speed_t speed,
                        const gc_direction_t directions[GC_DIRECTION_COUNT],
                        const char *label) {
-    gc_node_t *node = (gc_node_t *)malloc(sizeof(gc_node_t));
+    gc_node_t *node = smalloc(sizeof(*node));
     assert(node != NULL && "Out of memory");
     memset(node, 0, sizeof(gc_node_t));
 
@@ -101,9 +102,7 @@ gc_node_t *gc_node_empty_new(square_t id, gc_node_color_t color) {
 void gc_graph_free(gc_graph_t *graph);
 
 gc_graph_t *gc_graph_new(board_t *board) {
-    gc_graph_t *graph = (gc_graph_t *)malloc(sizeof(gc_graph_t));
-    assert(graph != NULL && "Out of memory");
-    memset(graph, 0, sizeof(gc_graph_t));
+    gc_graph_t *graph = smalloc(sizeof(*graph));
 
     for (square_t i = 0; i < SQUARE_COUNT; i++) {
         if (board == NULL) {
@@ -225,9 +224,7 @@ void gc_graph_insert_edges(gc_graph_t *graph, movelist_t *moves) {
 }
 
 void gc_graph_insert_edge(gc_graph_t *graph, square_t a, square_t b) {
-    gc_edge_t *edge = (gc_edge_t *)malloc(sizeof(gc_edge_t));
-    assert(edge != NULL && "Out of memory");
-    memset(edge, 0, sizeof(gc_edge_t));
+    gc_edge_t *edge = smalloc(sizeof(*edge));
 
     edge->a = graph->nodes[a];
     edge->b = graph->nodes[b];
