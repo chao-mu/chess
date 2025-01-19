@@ -64,10 +64,7 @@ clean: $(INCLUDE) $(BUILD) $(BINDIR) $(LIBDIR)
 lint:
 	clang-tidy --quiet -header-filter=$(SRC)/.* $(SRC)/*.c $(SRC)/*.h -- $(CFLAGS) -fno-caret-diagnostics
 
-compiledb:
-	pip install compiledb
-
-compile_commands.json: compiledb
+compile_commands.json: all
 	compiledb make
 
 doc:
