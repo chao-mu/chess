@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include "gc.h"
 #include "square.h"
 
 /*
@@ -23,7 +24,7 @@ typedef enum board_turn {
 } board_turn_t;
 
 typedef struct board {
-    squares_t squares;
+    square_piece_t squares[GC_GRAPH_NODES];
     board_turn_t turn;
 } board_t;
 
@@ -39,6 +40,7 @@ square_piece_t board_get_piece(board_t *board, square_t square);
 
 square_rank_t board_get_rank(board_t *board, square_piece_t piece,
                              square_file_t file);
+
 square_file_t board_get_file(board_t *board, square_piece_t piece,
                              square_rank_t rank);
 

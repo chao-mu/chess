@@ -10,7 +10,7 @@ void dot_fprint_node(FILE* out_fp, dot_node_t node) {
     fprintf(out_fp,
             "\t%s [shape=circle label=\"%s\" "
             "]\n",
-            node.id, node.label, node.pos_x, node.pos_y);
+            node.id, node.label);
 }
 
 void dot_fprint_start(FILE* out_fp) {

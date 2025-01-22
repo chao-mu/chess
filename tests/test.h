@@ -3,10 +3,10 @@
 
 #define assert_true(x) \
     assert(x);         \
-    printf(".");
+    fprintf(stderr, ".");
 
-#define test_start(x) \
-    printf(x);        \
-    printf(" ");
+#define test_start(x)   \
+    fprintf(stderr, x); \
+    fprintf(stderr, " ");
 
-#define test_end() printf(" ok\n");
+#define test_end() fprintf(stderr, " ok\n");

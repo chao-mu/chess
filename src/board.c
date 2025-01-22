@@ -32,7 +32,7 @@ square_rank_t board_get_rank(board_t *board, square_piece_t piece,
         }
     }
 
-    return SQUARE_RANK_OOB;
+    return SQUARE_RANK_COUNT;
 }
 
 square_file_t board_get_file(board_t *board, square_piece_t piece,
@@ -43,7 +43,7 @@ square_file_t board_get_file(board_t *board, square_piece_t piece,
         }
     }
 
-    return SQUARE_FILE_OOB;
+    return SQUARE_FILE_COUNT;
 }
 
 square_piece_t board_get_piece(board_t *board, square_t square) {

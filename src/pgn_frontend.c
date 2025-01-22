@@ -9,6 +9,7 @@
 #include "pgn.h"
 #include "pgn.lex.h"
 #include "pgn.syntax.h"
+#include "smalloc.h"
 #include "symbol.h"
 
 #define UNUSED(x) (void)(x)

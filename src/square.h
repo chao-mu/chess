@@ -1,11 +1,7 @@
 #ifndef SQUARE_H
 #define SQUARE_H
 
-#define SQUARE_RANK_COUNT 8
-#define SQUARE_FILE_COUNT 8
-#define SQUARE_COUNT 64
-
-extern const char* SQUARE_NAMES[SQUARE_COUNT];
+#include <stdbool.h>
 
 typedef enum square_rank {
     SQUARE_RANK_1 = 0,
@@ -16,7 +12,7 @@ typedef enum square_rank {
     SQUARE_RANK_6,
     SQUARE_RANK_7,
     SQUARE_RANK_8,
-    SQUARE_RANK_OOB,
+    SQUARE_RANK_COUNT,
 } square_rank_t;
 
 typedef enum square_file {
@@ -28,82 +24,83 @@ typedef enum square_file {
     SQUARE_FILE_F,
     SQUARE_FILE_G,
     SQUARE_FILE_H,
-    SQUARE_FILE_OOB,
+    SQUARE_FILE_COUNT,
 } square_file_t;
 
 typedef enum square {
-    SQUARE_A1 = 0 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_A2 = 0 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_A3 = 0 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_A4 = 0 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_A5 = 0 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_A6 = 0 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_A7 = 0 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_A8 = 0 + (7 * SQUARE_RANK_COUNT),
+    SQUARE_A8,
+    SQUARE_B8,
+    SQUARE_C8,
+    SQUARE_D8,
+    SQUARE_E8,
+    SQUARE_F8,
+    SQUARE_G8,
+    SQUARE_H8,
 
-    SQUARE_B1 = 1 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_B2 = 1 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_B3 = 1 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_B4 = 1 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_B5 = 1 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_B6 = 1 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_B7 = 1 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_B8 = 1 + (7 * SQUARE_RANK_COUNT),
+    SQUARE_A7,
+    SQUARE_B7,
+    SQUARE_C7,
+    SQUARE_D7,
+    SQUARE_E7,
+    SQUARE_F7,
+    SQUARE_G7,
+    SQUARE_H7,
 
-    SQUARE_C1 = 2 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_C2 = 2 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_C3 = 2 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_C4 = 2 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_C5 = 2 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_C6 = 2 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_C7 = 2 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_C8 = 2 + (7 * SQUARE_RANK_COUNT),
+    SQUARE_A6,
+    SQUARE_B6,
+    SQUARE_C6,
+    SQUARE_D6,
+    SQUARE_E6,
+    SQUARE_F6,
+    SQUARE_G6,
+    SQUARE_H6,
 
-    SQUARE_D1 = 3 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_D2 = 3 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_D3 = 3 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_D4 = 3 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_D5 = 3 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_D6 = 3 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_D7 = 3 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_D8 = 3 + (7 * SQUARE_RANK_COUNT),
+    SQUARE_A5,
+    SQUARE_B5,
+    SQUARE_C5,
+    SQUARE_D5,
+    SQUARE_E5,
+    SQUARE_F5,
+    SQUARE_G5,
+    SQUARE_H5,
 
-    SQUARE_E1 = 4 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_E2 = 4 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_E3 = 4 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_E4 = 4 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_E5 = 4 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_E6 = 4 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_E7 = 4 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_E8 = 4 + (7 * SQUARE_RANK_COUNT),
+    SQUARE_A4,
+    SQUARE_B4,
+    SQUARE_C4,
+    SQUARE_D4,
+    SQUARE_E4,
+    SQUARE_F4,
+    SQUARE_G4,
+    SQUARE_H4,
 
-    SQUARE_F1 = 5 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_F2 = 5 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_F3 = 5 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_F4 = 5 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_F5 = 5 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_F6 = 5 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_F7 = 5 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_F8 = 5 + (7 * SQUARE_RANK_COUNT),
+    SQUARE_A3,
+    SQUARE_B3,
+    SQUARE_C3,
+    SQUARE_D3,
+    SQUARE_E3,
+    SQUARE_F3,
+    SQUARE_G3,
+    SQUARE_H3,
 
-    SQUARE_G1 = 6 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_G2 = 6 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_G3 = 6 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_G4 = 6 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_G5 = 6 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_G6 = 6 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_G7 = 6 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_G8 = 6 + (7 * SQUARE_RANK_COUNT),
+    SQUARE_A2,
+    SQUARE_B2,
+    SQUARE_C2,
+    SQUARE_D2,
+    SQUARE_E2,
+    SQUARE_F2,
+    SQUARE_G2,
+    SQUARE_H2,
 
-    SQUARE_H1 = 7 + (0 * SQUARE_RANK_COUNT),
-    SQUARE_H2 = 7 + (1 * SQUARE_RANK_COUNT),
-    SQUARE_H3 = 7 + (2 * SQUARE_RANK_COUNT),
-    SQUARE_H4 = 7 + (3 * SQUARE_RANK_COUNT),
-    SQUARE_H5 = 7 + (4 * SQUARE_RANK_COUNT),
-    SQUARE_H6 = 7 + (5 * SQUARE_RANK_COUNT),
-    SQUARE_H7 = 7 + (6 * SQUARE_RANK_COUNT),
-    SQUARE_H8 = 7 + (7 * SQUARE_RANK_COUNT),
-    SQUARE_OOB = 404,
+    SQUARE_A1,
+    SQUARE_B1,
+    SQUARE_C1,
+    SQUARE_D1,
+    SQUARE_E1,
+    SQUARE_F1,
+    SQUARE_G1,
+    SQUARE_H1,
+
+    SQUARE_COUNT,
 } square_t;
 
 typedef enum square_piece {
@@ -123,14 +120,22 @@ typedef enum square_piece {
     SQUARE_PIECE_COUNT
 } square_piece_t;
 
-extern const char* PIECE_NAMES[SQUARE_PIECE_COUNT];
-
 typedef square_piece_t squares_t[SQUARE_COUNT];
-
-square_t square_from(int file, int rank);
 
 square_rank_t square_get_rank(square_t square);
 
 square_file_t square_get_file(square_t square);
+
+int square_geti_file(int id);
+
+int square_geti_rank(int id);
+
+bool square_is_valid(int file, int rank);
+
+int square_from(int file, int rank);
+
+char square_getc_file(int id);
+
+char square_getc_rank(int id);
 
 #endif

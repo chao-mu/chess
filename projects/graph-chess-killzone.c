@@ -11,6 +11,7 @@
 
 // Shows number of hops to given square per opposite colored piece
 int main(int argc, const char** argv) {
+    /*
     FILE* out_fp = stdout;
 
     if (argc != 2) {
@@ -86,6 +87,7 @@ int main(int argc, const char** argv) {
     gc_graph_free(graph);
     board_free(board);
     board_free(sub_board);
+    */
 
     return EXIT_SUCCESS;
 }

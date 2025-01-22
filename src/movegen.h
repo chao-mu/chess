@@ -1,22 +1,38 @@
-#ifndef MOVE_GEN_H
-#define MOVE_GEN_H
+#ifndef GC_SUBGRAPH_H
+#define GC_SUBGRAPH_H
 
-#include "board.h"
-#include "move.h"
-#include "square.h"
+#include <stddef.h>
+#include <stdio.h>
 
-bool movegen(movelist_t* moves_out, board_t* board);
+#include "gc.h"
 
-void movegen_rook(movelist_t* moves_out, board_t* board, square_t from);
+// The max number of legal moves a single piece can make in a move
+#define MOVEGEN_MAX_MOVES 32
 
-void movegen_bishop(movelist_t* moves_out, board_t* board, square_t from);
+// How deep to calculate
+#define MOVEGEN_MAX_DEPTH 12
 
-void movegen_queen(movelist_t* moves_out, board_t* board, square_t from);
+// Wildly pesimistic estimate of maximum todo count
+#define MOVEGEN_TODO_CAPACITY (MOVEGEN_MAX_MOVES * MOVEGEN_MAX_DEPTH * 32)
 
-void movegen_pawn(movelist_t* moves_out, board_t* board, square_t from);
+typedef struct todo_item {
+    int from_file;
+    int from_rank;
+    int to_file;
+    int to_rank;
+    int depth;  //  required jumps to reach from_file/rank
+} todo_item_t;
 
-void movegen_king(movelist_t* moves_out, board_t* board, square_t from);
+typedef struct todo {
+    todo_item_t items[MOVEGEN_TODO_CAPACITY];
+    size_t size;
+} todo_t;
 
-void movegen_knight(movelist_t* moves_out, board_t* board, square_t from);
+typedef void (*movegen_t)(todo_t* todo, int rank, int file, int depth);
+
+void movegen_knight(todo_t* todo, int file, int rank, int depth);
+
+void movegen_walk(gc_graph_t* graph, movegen_t movegen, gc_node_color_t color,
+                  uint8_t square_from);
 
 #endif

@@ -1,60 +1,26 @@
 #include "square.h"
 
-const char* SQUARE_NAMES[SQUARE_COUNT] = {
-    "A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1",
+#include <assert.h>
+#include <stdbool.h>
 
-    "A2", "B2", "C2", "D2", "E2", "F2", "G2", "H2",
+int square_geti_file(int id) { return id % SQUARE_FILE_COUNT; }
 
-    "A3", "B3", "C3", "D3", "E3", "F3", "G3", "H3",
+int square_geti_rank(int id) { return 7 - (id / SQUARE_RANK_COUNT); }
 
-    "A4", "B4", "C4", "D4", "E4", "F4", "G4", "H4",
-
-    "A5", "B5", "C5", "D5", "E5", "F5", "G5", "H5",
-
-    "A6", "B6", "C6", "D6", "E6", "F6", "G6", "H6",
-
-    "A7", "B7", "C7", "D7", "E7", "F7", "G7", "H7",
-
-    "A8", "B8", "C8", "D8", "E8", "F8", "G8", "H8",
-};
-
-const char* PIECE_NAMES[SQUARE_PIECE_COUNT] = {
-    "Empty",
-
-    "♙",     "♟",
-
-    "♘",     "♞",
-
-    "♗",     "♝",
-
-    "♖",     "♜",
-
-    "♕",     "♛",
-
-    "♔",     "♚",
-};
-
-inline square_t square_from(int file, int rank) {
-    if (file < 0 || file >= SQUARE_FILE_COUNT) {
-        return SQUARE_OOB;
-    }
-
-    if (rank < 0 || rank >= SQUARE_RANK_COUNT) {
-        return SQUARE_OOB;
-    }
-
-    int square = file + (rank * SQUARE_RANK_COUNT);
-    if (square >= SQUARE_COUNT) {
-        return SQUARE_OOB;
-    }
-
-    return square;
+bool square_is_valid(int file, int rank) {
+    return file >= 0 && file < SQUARE_FILE_COUNT && rank >= 0 &&
+           rank < SQUARE_RANK_COUNT;
 }
 
-inline square_file_t square_get_file(square_t square) {
-    return square % SQUARE_FILE_COUNT;
+int square_from(int file, int rank) {
+    assert(square_is_valid(file, rank));
+
+    int file_contribution = file;
+    int rank_contribution = (7 - rank) * SQUARE_RANK_COUNT;
+
+    return file_contribution + rank_contribution;
 }
 
-inline square_rank_t square_get_rank(square_t square) {
-    return square / SQUARE_RANK_COUNT;
-}
+char square_getc_file(int id) { return 'A' + square_geti_file(id); }
+
+char square_getc_rank(int id) { return '1' + square_geti_rank(id); }
