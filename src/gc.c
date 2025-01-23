@@ -44,6 +44,12 @@ void gc_graph_insert_edge(gc_graph_t *graph, uint8_t from_id, uint8_t to_id,
     assert(from_id < GC_GRAPH_NODES);
     assert(to_id < GC_GRAPH_NODES);
 
+    // Guarentee no duplicate edges
+    assert(!graph->edge_exists[from_id][to_id]);
+    graph->edge_exists[from_id][to_id] = true;
+
+    graph->weights[from_id][to_id] = weight;
+
     gc_edge_t *edge = smalloc(sizeof(*edge));
     edge->weight = weight;
     edge->from_id = from_id;

@@ -49,6 +49,8 @@ typedef struct gc_graph {
     gc_node_t *nodes[GC_GRAPH_NODES];
     gc_edge_t *edges[GC_GRAPH_NODES];
     gc_edge_t *edges_reverse[GC_GRAPH_NODES];
+    int weights[GC_GRAPH_NODES][GC_GRAPH_NODES];
+    bool edge_exists[GC_GRAPH_NODES][GC_GRAPH_NODES];
 } gc_graph_t;
 
 /**

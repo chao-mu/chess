@@ -7,6 +7,7 @@
 #include "gc.h"
 #include "gc_io.h"
 #include "movegen.h"
+#include "square.h"
 
 #define RANK_COUNT 8
 #define FILE_COUNT 8
@@ -78,17 +79,54 @@ int main(int argc, const char** argv) {
 
     const char* fen = argv[1];
 
+    square_t center = SQUARE_E1;
+
     gc_graph_t* graph = graph_fen_parse(fen);
     for (uint8_t id = 0; id < GC_GRAPH_NODES; id++) {
         gc_node_color_t color = gc_graph_get_color(graph, id);
         gc_piece_t piece = gc_graph_get_piece(graph, id);
 
-        if (piece == GC_PIECE_KNIGHT) {
-            movegen_walk(graph, movegen_knight, color, id);
+        switch (piece) {
+            case GC_PIECE_KNIGHT:
+                // printf("Walkgen for knight %d %d\n", color, id);
+                movegen_walk(graph, movegen_knight, color, id);
+                break;
+            case GC_PIECE_QUEEN:
+                // printf("Walkgen for queen %d %d\n", color, id);
+                movegen_walk(graph, movegen_queen, color, id);
+                break;
+            case GC_PIECE_ROOK:
+                // printf("Walkgen for rook %d %d\n", color, id);
+                movegen_walk(graph, movegen_rook, color, id);
+                break;
+            case GC_PIECE_BISHOP:
+                // printf("Walkgen for bishop %d %d\n", color, id);
+                movegen_walk(graph, movegen_bishop, color, id);
+                break;
+            case GC_PIECE_KING:
+                // printf("Walkgen for king %d %d\n", color, id);
+                movegen_walk(graph, movegen_king, color, id);
+                break;
+            case GC_PIECE_NONE:
+                break;
         }
     }
 
-    gc_io_fprint(out_fp, graph);
+    gc_graph_t* subgraph = graph_fen_parse(fen);
+    for (gc_edge_t* edge = graph->edges_reverse[center]; edge != NULL;
+         edge = edge->next) {
+        uint8_t from_id = edge->from_id;
+        uint8_t to_id = edge->to_id;
+        int weight = edge->weight;
+        gc_node_color_t from_color = gc_graph_get_color(graph, edge->from_id);
+        gc_node_color_t to_color = gc_graph_get_color(graph, edge->to_id);
+
+        if (from_color != to_color) {
+            gc_graph_insert_edge(subgraph, from_id, to_id, weight);
+        }
+    }
+
+    gc_io_fprint(out_fp, subgraph);
 
     gc_graph_free(graph);
 

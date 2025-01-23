@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "gc.h"
@@ -14,6 +15,21 @@
 void todo_push(todo_t* todo, todo_item_t item) {
     assert(todo->size < MOVEGEN_TODO_CAPACITY);
     todo->items[todo->size++] = item;
+}
+
+void todo_push_until(todo_t* todo, gc_graph_t* graph, gc_node_color_t color,
+                     bool* stop, todo_item_t item) {
+    if (*stop) {
+        return;
+    }
+
+    if (gc_graph_get_color(graph, square_from(item.to_file, item.to_rank)) ==
+        color) {
+        *stop = true;
+        return;
+    }
+
+    todo_push(todo, item);
 }
 
 todo_item_t todo_shift(todo_t* todo) {
@@ -61,7 +77,9 @@ void movegen_walk(gc_graph_t* graph, movegen_t movegen, gc_node_color_t color,
             continue;
         }
 
-        if (depths[to_file][to_rank] < depth) {
+        // If we've already calculated this square with a lower jump count
+        if (depths[to_file][to_rank] != -1 &&
+            depths[to_file][to_rank] <= depth) {
             continue;
         }
 
@@ -77,7 +95,7 @@ void movegen_walk(gc_graph_t* graph, movegen_t movegen, gc_node_color_t color,
             continue;
         }
 
-        (*movegen)(todo, to_file, to_rank, depth);
+        (*movegen)(graph, color, todo, to_file, to_rank, depth);
     }
 
     // Insert the depth edges
@@ -85,14 +103,189 @@ void movegen_walk(gc_graph_t* graph, movegen_t movegen, gc_node_color_t color,
         for (size_t rank = 0; rank < SQUARE_RANK_COUNT; rank++) {
             uint8_t to_id = square_from(file, rank);
             int depth = depths[file][rank];
-            gc_graph_insert_edge(graph, orig_square, to_id, depth);
+
+            // We initialized empties as MOVEGEN_MAX_DEPTH
+            if (depth < MOVEGEN_MAX_DEPTH) {
+                gc_graph_insert_edge(graph, orig_square, to_id, depth);
+            }
         }
     }
 
     free(todo);
 }
 
-void movegen_knight(todo_t* todo, int file, int rank, int depth) {
+void movegen_rook(gc_graph_t* graph, gc_node_color_t color, todo_t* todo,
+                  int file, int rank, int depth) {
+    bool stopped[4] = {false};
+    for (int i = 0; i < SQUARE_FILE_COUNT; i++) {
+        int cursor = 0;
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file + i,
+                                      .to_rank = rank,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file - i,
+                                      .to_rank = rank,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file,
+                                      .to_rank = rank + i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file,
+                                      .to_rank = rank - i,
+                                      .depth = depth});
+    }
+}
+
+void movegen_bishop(gc_graph_t* graph, gc_node_color_t color, todo_t* todo,
+                    int file, int rank, int depth) {
+    bool stopped[4] = {false};
+    for (int i = 0; i < SQUARE_FILE_COUNT; i++) {
+        int cursor = 0;
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file + i,
+                                      .to_rank = rank + i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file + i,
+                                      .to_rank = rank - i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file - i,
+                                      .to_rank = rank + i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file - i,
+                                      .to_rank = rank - i,
+                                      .depth = depth});
+    }
+}
+
+void movegen_queen(gc_graph_t* graph, gc_node_color_t color, todo_t* todo,
+                   int file, int rank, int depth) {
+    bool stopped[8] = {false};
+    for (int i = 0; i < SQUARE_FILE_COUNT; i++) {
+        int cursor = 0;
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file + i,
+                                      .to_rank = rank + i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file + i,
+                                      .to_rank = rank - i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file - i,
+                                      .to_rank = rank + i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file - i,
+                                      .to_rank = rank - i,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file + i,
+                                      .to_rank = rank,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file - i,
+                                      .to_rank = rank,
+                                      .depth = depth});
+
+        todo_push_until(todo, graph, color, &stopped[cursor++],
+                        (todo_item_t){.from_file = file,
+                                      .from_rank = rank,
+                                      .to_file = file,
+                                      .to_rank = rank - i,
+                                      .depth = depth});
+    }
+}
+
+void movegen_king(gc_graph_t* graph, gc_node_color_t color, todo_t* todo,
+                  int file, int rank, int depth) {
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file + 1,
+                                  .to_rank = rank + 1,
+                                  .depth = depth});
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file + 1,
+                                  .to_rank = rank - 1,
+                                  .depth = depth});
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file - 1,
+                                  .to_rank = rank + 1,
+                                  .depth = depth});
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file - 1,
+                                  .to_rank = rank - 1,
+                                  .depth = depth});
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file + 1,
+                                  .to_rank = rank,
+                                  .depth = depth});
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file - 1,
+                                  .to_rank = rank,
+                                  .depth = depth});
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file,
+                                  .to_rank = rank + 1,
+                                  .depth = depth});
+    todo_push(todo, (todo_item_t){.from_file = file,
+                                  .from_rank = rank,
+                                  .to_file = file,
+                                  .to_rank = rank - 1,
+                                  .depth = depth});
+}
+
+void movegen_knight(gc_graph_t* graph, gc_node_color_t color, todo_t* todo,
+                    int file, int rank, int depth) {
     todo_push(todo, (todo_item_t){.from_file = file,
                                   .from_rank = rank,
                                   .to_file = file + 1,
