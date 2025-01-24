@@ -1,118 +1,50 @@
 #include "fen.h"
 
 #include <ctype.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "board.h"
+#include "assert.h"
+#include "gc.h"
 #include "smalloc.h"
 #include "square.h"
 
-square_piece_t to_piece(char symbol) {
-    square_piece_t result = SQUARE_EMPTY;
-    switch (symbol) {
-        case 'P':
-            result = SQUARE_PAWN_WHITE;
-            break;
-        case 'p':
-            result = SQUARE_PAWN_BLACK;
-            break;
-        case 'N':
-            result = SQUARE_KNIGHT_WHITE;
-            break;
-        case 'n':
-            result = SQUARE_KNIGHT_BLACK;
-            break;
-        case 'B':
-            result = SQUARE_BISHOP_WHITE;
-            break;
-        case 'b':
-            result = SQUARE_BISHOP_BLACK;
-            break;
-        case 'R':
-            result = SQUARE_ROOK_WHITE;
-            break;
-        case 'r':
-            result = SQUARE_ROOK_BLACK;
-            break;
-        case 'Q':
-            result = SQUARE_QUEEN_WHITE;
-            break;
-        case 'q':
-            result = SQUARE_QUEEN_BLACK;
-            break;
-        case 'K':
-            result = SQUARE_KING_WHITE;
-            break;
-        case 'k':
-            result = SQUARE_KING_BLACK;
-            break;
-        default:
-            break;
-    }
-
-    return result;
-}
-
-char from_piece(square_piece_t piece) {
-    char result = '\0';
+char from_piece(gc_piece_t piece, gc_node_color_t color) {
     switch (piece) {
-        case SQUARE_PAWN_WHITE:
-            result = 'P';
-            break;
-        case SQUARE_PAWN_BLACK:
-            result = 'p';
-            break;
-        case SQUARE_KNIGHT_WHITE:
-            result = 'N';
-            break;
-        case SQUARE_KNIGHT_BLACK:
-            result = 'n';
-            break;
-        case SQUARE_BISHOP_WHITE:
-            result = 'B';
-            break;
-        case SQUARE_BISHOP_BLACK:
-            result = 'b';
-            break;
-        case SQUARE_ROOK_WHITE:
-            result = 'R';
-            break;
-        case SQUARE_ROOK_BLACK:
-            result = 'r';
-            break;
-        case SQUARE_QUEEN_WHITE:
-            result = 'Q';
-            break;
-        case SQUARE_QUEEN_BLACK:
-            result = 'q';
-            break;
-        case SQUARE_KING_WHITE:
-            result = 'K';
-            break;
-        case SQUARE_KING_BLACK:
-            result = 'k';
-            break;
+        case GC_PIECE_PAWN:
+            return color == GC_NODE_COLOR_BLACK ? 'p' : 'P';
+        case GC_PIECE_KNIGHT:
+            return color == GC_NODE_COLOR_BLACK ? 'n' : 'N';
+        case GC_PIECE_BISHOP:
+            return color == GC_NODE_COLOR_BLACK ? 'b' : 'B';
+        case GC_PIECE_ROOK:
+            return color == GC_NODE_COLOR_BLACK ? 'r' : 'R';
+        case GC_PIECE_QUEEN:
+            return color == GC_NODE_COLOR_BLACK ? 'q' : 'Q';
+        case GC_PIECE_KING:
+            return color == GC_NODE_COLOR_BLACK ? 'k' : 'K';
         default:
-            break;
+            return '\0';
     }
-
-    return result;
 }
 
-void fen_build(char **fen_out, board_t *board) {
-    char *fen = smalloc(100);
+void fen_build(gc_graph_t* graph, char** fen_out) {
+    char* fen = smalloc(100);
     size_t pos = 0;
 
     for (int rank = SQUARE_RANK_COUNT - 1; rank >= 0; rank--) {
         if (rank < SQUARE_RANK_COUNT - 1) {
             fen[pos++] = '/';
         }
+
         int empties = 0;
         for (int file = 0; file < SQUARE_FILE_COUNT; file++) {
-            square_piece_t piece =
-                board_get_piece(board, square_from(file, rank));
-            char symbol = from_piece(piece);
+            uint8_t node_id = square_from(file, rank);
+            gc_piece_t piece = gc_graph_get_piece(graph, node_id);
+            gc_node_color_t color = gc_graph_get_color(graph, node_id);
+
+            char symbol = from_piece(piece, color);
             if (symbol != '\0') {
                 if (empties > 0) {
                     fen[pos++] = '0' + empties;
@@ -130,7 +62,8 @@ void fen_build(char **fen_out, board_t *board) {
     }
 
     // Turn
-    pos += sprintf(&fen[pos], " %c", board->turn == WHITE ? 'w' : 'b');
+    pos += sprintf(&fen[pos], " %c",
+                   graph->turn == GC_NODE_COLOR_WHITE ? 'w' : 'b');
 
     // Castling rights
     pos += sprintf(&fen[pos], " KQkq");
@@ -139,15 +72,17 @@ void fen_build(char **fen_out, board_t *board) {
     pos += sprintf(&fen[pos], " -");
 
     // Move/ply
-    pos += sprintf(&fen[pos], " 0 1");
+    pos += sprintf(&fen[pos], " %d %d", graph->ply / 2, graph->ply);
 
     fen[pos++] = '\0';
 
     *fen_out = fen;
 }
 
-void fen_parse(const char *fen, board_t *board) {
-    int idx = 0;
+gc_graph_t* fen_parse(const char* fen) {
+    gc_graph_t* graph = gc_graph_new();
+
+    int square_id = 0;
     while (*fen != '\0') {
         char c = *(fen++);
         if (c == ' ') {
@@ -158,26 +93,45 @@ void fen_parse(const char *fen, board_t *board) {
             continue;
         }
 
-        int rank = 7 - (idx / 8);
-        int file = idx % 8;
-
         if (isdigit(c)) {
             int empties = c - '0';
             for (int i = 0; i < empties; i++) {
-                board_set_piece(board, square_from(file + i, rank),
-                                SQUARE_EMPTY);
-                idx++;
+                square_id++;
             }
         } else {
-            square_piece_t piece = to_piece(c);
-            board_set_piece(board, square_from(file, rank), piece);
-            idx++;
+            gc_node_t node = {0};
+            node.color = isupper(c) ? GC_NODE_COLOR_WHITE : GC_NODE_COLOR_BLACK;
+            switch (c) {
+                case 'r':
+                case 'R':
+                    node.piece = GC_PIECE_ROOK;
+                    break;
+                case 'b':
+                case 'B':
+                    node.piece = GC_PIECE_BISHOP;
+                    break;
+                case 'n':
+                case 'N':
+                    node.piece = GC_PIECE_KNIGHT;
+                    break;
+                case 'q':
+                case 'Q':
+                    node.piece = GC_PIECE_QUEEN;
+                    break;
+                case 'k':
+                case 'K':
+                    node.piece = GC_PIECE_KING;
+                    break;
+                case 'p':
+                case 'P':
+                    node.piece = GC_PIECE_PAWN;
+                    break;
+            }
+
+            gc_graph_insert_node(graph, square_id, node);
+            square_id++;
         }
     }
 
-    if (*fen == 'w') {
-        board->turn = WHITE;
-    } else if (*fen == 'b') {
-        board->turn = BLACK;
-    }
+    return graph;
 }

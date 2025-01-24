@@ -1,9 +1,8 @@
 #ifndef FEN_H
 #define FEN_H
 
-#include "board.h"
+#include "gc.h"
 
-void fen_parse(const char *fen, board_t *board);
-void fen_build(char **fen_out, board_t *board);
-
+void fen_build(gc_graph_t* graph, char** fen_out);
+gc_graph_t* fen_parse(const char* fen);
 #endif

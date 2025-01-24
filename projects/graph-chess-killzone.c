@@ -1,17 +1,17 @@
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "board.h"
 #include "fen.h"
 #include "gc.h"
-#include "move.h"
 #include "movegen.h"
 
-// Shows number of hops to given square per opposite colored piece
+#define RANK_COUNT 8
+#define FILE_COUNT 8
+
 int main(int argc, const char** argv) {
-    /*
     FILE* out_fp = stdout;
 
     if (argc != 2) {
@@ -21,73 +21,34 @@ int main(int argc, const char** argv) {
 
     const char* fen = argv[1];
 
-    board_t* board = board_new(WHITE);
-    fen_parse(fen, board);
-    gc_graph_t* graph = gc_graph_new(board);
+    uint8_t white_king_id = GC_GRAPH_NODES;
+    uint8_t black_king_id = GC_GRAPH_NODES;
 
-    movelist_t* moves = movelist_new();
-    movegen(moves, board);
+    gc_graph_t* graph = fen_parse(fen);
+    movegen_all(graph);
 
-    // Add edges to graph
-    gc_graph_insert_edges(graph, moves);
+    for (uint8_t id = 0; id < GC_GRAPH_NODES; id++) {
+        gc_node_color_t color = gc_graph_get_color(graph, id);
+        gc_piece_t piece = gc_graph_get_piece(graph, id);
 
-    gc_node_color_t perspective = GC_NODE_COLOR_BLACK;
-    square_t center = SQUARE_COUNT;
+        switch (piece) {
+            case GC_PIECE_KING:
+                if (color == GC_NODE_COLOR_WHITE) {
+                    white_king_id = id;
+                } else if (color == GC_NODE_COLOR_BLACK) {
+                    black_king_id = id;
+                }
 
-    // Find our king
-    for (gc_edge_t* edge = graph->edges; edge != NULL; edge = edge->next) {
-        if ((board->squares[edge->a->id] == SQUARE_KING_BLACK &&
-             perspective == GC_NODE_COLOR_BLACK) ||
-            (board->squares[edge->a->id] == SQUARE_KING_WHITE &&
-             perspective == GC_NODE_COLOR_WHITE)) {
-            center = edge->a->id;
-        }
-    }
-
-    assert(center < SQUARE_COUNT && "Enemy King Not Found");
-
-    // Get squares around king
-    board_t* sub_board = board_new(WHITE);
-
-    // Populate king moves while board is empty.
-    movelist_t* king_moves = movelist_new();
-    movegen_king(king_moves, sub_board, center);
-
-    // Populate the board with the opposite player's pieces
-    for (gc_edge_t* edge = graph->edges; edge != NULL; edge = edge->next) {
-        if (edge->a->color != perspective) {
-            sub_board->squares[edge->a->id] = board->squares[edge->a->id];
-        }
-    }
-
-    // Populate with our king
-    sub_board->squares[center] = perspective == GC_NODE_COLOR_WHITE
-                                     ? SQUARE_KING_WHITE
-                                     : SQUARE_KING_BLACK;
-
-    gc_graph_t* subgraph = gc_graph_new(sub_board);
-    for (gc_edge_t* edge = graph->edges; edge != NULL; edge = edge->next) {
-        // Does the edge threaten our zone?
-        for (move_t* king_move = king_moves->head; king_move != NULL;
-             king_move = king_move->next) {
-            if (edge->b->id == king_move->from ||
-                edge->b->id == king_move->to) {
-                gc_graph_insert_edge(subgraph, edge->a->id, edge->b->id);
+                // printf("Walkgen for king %d %d\n", color, id);
+                movegen_walk(graph, movegen_king, color, id);
                 break;
-            }
+            default:
+                break;
         }
     }
 
-    // Print graph
-    gc_fprint_graph(out_fp, subgraph);
-
-    // Free resources
-    movelist_free(king_moves);
-    movelist_free(moves);
-    gc_graph_free(graph);
-    board_free(board);
-    board_free(sub_board);
-    */
+    assert(white_king_id != GC_GRAPH_NODES && "White king not found");
+    assert(black_king_id != GC_GRAPH_NODES && "Black king not found");
 
     return EXIT_SUCCESS;
 }

@@ -45,6 +45,38 @@ todo_item_t todo_shift(todo_t* todo) {
     return item;
 }
 
+void movegen_all(gc_graph_t* graph) {
+    for (uint8_t id = 0; id < GC_GRAPH_NODES; id++) {
+        gc_node_color_t color = gc_graph_get_color(graph, id);
+        gc_piece_t piece = gc_graph_get_piece(graph, id);
+
+        switch (piece) {
+            case GC_PIECE_KNIGHT:
+                // printf("Walkgen for knight %d %d\n", color, id);
+                movegen_walk(graph, movegen_knight, color, id);
+                break;
+            case GC_PIECE_QUEEN:
+                // printf("Walkgen for queen %d %d\n", color, id);
+                movegen_walk(graph, movegen_queen, color, id);
+                break;
+            case GC_PIECE_ROOK:
+                // printf("Walkgen for rook %d %d\n", color, id);
+                movegen_walk(graph, movegen_rook, color, id);
+                break;
+            case GC_PIECE_BISHOP:
+                // printf("Walkgen for bishop %d %d\n", color, id);
+                movegen_walk(graph, movegen_bishop, color, id);
+                break;
+            case GC_PIECE_KING:
+                // printf("Walkgen for king %d %d\n", color, id);
+                movegen_walk(graph, movegen_king, color, id);
+                break;
+            case GC_PIECE_NONE:
+                break;
+        }
+    }
+}
+
 void movegen_walk(gc_graph_t* graph, movegen_t movegen, gc_node_color_t color,
                   uint8_t orig_square) {
     todo_t* todo = smalloc(sizeof(*todo));

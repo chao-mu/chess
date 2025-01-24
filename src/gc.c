@@ -11,6 +11,9 @@
 gc_graph_t *gc_graph_new(void) {
     gc_graph_t *graph = smalloc(sizeof(*graph));
 
+    graph->turn = GC_NODE_COLOR_WHITE;
+    graph->ply = 1;
+
     return graph;
 }
 

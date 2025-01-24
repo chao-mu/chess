@@ -49,4 +49,6 @@ void movegen_bishop(gc_graph_t* graph, gc_node_color_t color, todo_t* todo,
 void movegen_king(gc_graph_t* graph, gc_node_color_t color, todo_t* todo,
                   int file, int rank, int depth);
 
+void movegen_all(gc_graph_t* graph);
+
 #endif
